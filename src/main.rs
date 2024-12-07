@@ -1,16 +1,16 @@
-use actix_web::{web, App, HttpResponse, HttpServer, Responder};
+#![warn(clippy::all, clippy::pedantic)]
 
-async fn health_check() -> impl Responder {
-    HttpResponse::Ok()
-}
+use std::net::TcpListener;
+use license_api::startup::run;
+use license_api::configuration::get_configuration;
 
 #[tokio::main]
 async fn main() -> Result<(), std::io::Error> {
-    HttpServer::new(|| {
-        App::new()
-            .route("/healthcheck", web::get().to(health_check))
-    })
-    .bind("127.0.0.1:7200")?
-    .run()
-    .await
+    // Panic if we can't read configuration
+    let configuration = get_configuration().expect("Failed to read configuration.");
+
+    let address = format!("127.0.0.1:{}", configuration.application_port);
+    let listener = TcpListener::bind(address).expect("Failed to bind to port");
+
+    run(listener)?.await
 }
