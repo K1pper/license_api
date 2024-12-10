@@ -1,3 +1,5 @@
+use license_api::configuration::get_configuration;
+use sqlx::{Connection, PgConnection};
 use std::net::TcpListener;
 
 // Launch our application in the background ~somehow~
@@ -35,13 +37,26 @@ async fn health_check_works() {
     println!("\ntest health_check_works");
     // Arrange
     let address = spawn_app();
+
+    println!("Looking for configuration file");
+    let configuration = get_configuration().expect("Failed to read configuration");
+    let connection_string = configuration.database.connection_string();
+
+    println!("Postgres connection string is {}", connection_string);
+
+    let _connection = PgConnection::connect(&connection_string)
+        .await
+        .expect("Failed to connect to Postgres.");
+
     let client = reqwest::Client::new();
+
     // Act
     let response = client
         .get(&format!("{}/healthcheck", address))
         .send()
         .await
         .expect("Failed to execute request.");
+
     // Assert
     println!("  Spawned address is: {}", address);
     assert!(response.status().is_success());
