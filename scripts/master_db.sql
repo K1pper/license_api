@@ -6,7 +6,7 @@ use master;
 
 do $SCHEME$
 declare
-  _database tex = 'GHALicensePortal';
+  _database text = 'GHALicensePortal';
   _role_name text = 'jubilee';
   _user_name text = 'jub';
 begin
