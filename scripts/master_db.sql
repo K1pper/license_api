@@ -4,11 +4,12 @@
 
 use master;
 
-do $SCHEME$
+do 
+$DATA_DEFINITION$
 declare
   _database text = 'GHALicensePortal';
-  _role_name text = 'jubilee';
-  _user_name text = 'jub';
+  _role_name text = 'GHARole';
+  _user_name text = 'GHAUser';
 begin
   raise notice 'Updating schema...';
 
@@ -19,8 +20,8 @@ begin
     raise notice 'Role % created...', _role_name;
   end if;
 
-  grant connect on database master to jubilee;
-  grant usage on schema public to jubilee;
+  execute 'grant connect on database '||_database||' to '||GHARole;
+  execute 'grant usage on schema public to '||GHARole;
   
   if exists (select from pg_roles where rolname = _user_name and rolcanlogin = true) then
     raise notice 'Role % already exists...', _user_name;
@@ -145,9 +146,11 @@ begin
     execute 'grant all on customerapps to '||main_role_name;
   end if;
 
-end$SCHEME$;
+end
+$DATA_DEFINITION$;
 
-do $SEED$
+do 
+$SEED$
 declare
   mfs_application_name text = 'Mobile Field Service';
   licensekey text;
@@ -165,7 +168,8 @@ begin
   if not exists (select from applications where name = mfs_application_name) then 
     insert into applications (name, licencekey) values (mfs_application_name, licensekey); 
   end if;
-end$SEED$;
+end
+$SEED$;
 
 select * from applications;
 select * from customers;
@@ -183,6 +187,6 @@ drop table userapplications;
 drop table usercustomers;
 drop table devices;
 
-drop role jub;
-drop owned by jubilee;
-drop role jubilee;
+drop role GHAUser;
+drop owned by GHARole;
+drop role GHARole;
