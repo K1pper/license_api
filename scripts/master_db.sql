@@ -1,35 +1,35 @@
+/*
+  First create a GHALicensePortal database
+*/
+
+use master;
+
 do $SCHEME$
 declare
-  main_role_name text = 'jubilee';
-  main_user_name text = 'jub';
+  _database tex = 'GHALicensePortal';
+  _role_name text = 'jubilee';
+  _user_name text = 'jub';
 begin
   raise notice 'Updating schema...';
 
-  if exists (select from pg_database where datname = 'master') then
-    raise notice 'Database master already exists...';
+  if exists (select from pg_roles where rolname = _role_name and rolcanlogin = false) then
+      raise notice 'Role % already exists...', _role_name;
   else
-    create DATABASE master;
-    raise notice 'Database master created...';
-  end if;
-
-  if exists (select from pg_roles where rolname = main_role_name and rolcanlogin = false) then
-      raise notice 'Role % already exists...', main_role_name;
-  else
-    execute 'create role '||main_role_name||'';
-    raise notice 'Role % created...', main_role_name;
+    execute 'create role '||_role_name||'';
+    raise notice 'Role % created...', _role_name;
   end if;
 
   grant connect on database master to jubilee;
   grant usage on schema public to jubilee;
   
-  if exists (select from pg_roles where rolname = 'jub' and rolcanlogin = true) then
-    raise notice 'Role jub already exists...';
+  if exists (select from pg_roles where rolname = _user_name and rolcanlogin = true) then
+    raise notice 'Role % already exists...', _user_name;
   else
-    create user jub with password 'password';
-    raise notice 'Role jub created...';
+    execute 'create user '||_user_name||' with password ''password''';
+    raise notice 'Role % created...', _user_name;
   end if;
 
-  grant jubilee to jub;
+  execute 'grant '||_role_name||' to '||_user_name;
 
 /**********************************************************************************************************************************************************************************
 ***********************************************************************************************************************************************************************************
@@ -49,6 +49,7 @@ begin
     CreateDate timestamp not null default now(),  --utc is difficult - will this mess up my stuff?
     Suspended bool not null default false
   );
+  create index application_name ON Applications(Name);
     execute 'grant all on applications to '||main_role_name;
   end if;
 
@@ -58,6 +59,48 @@ begin
     alter table applications add column CabVersion text not null default ''; end if;
   if not exists (select from information_schema.columns where table_schema = 'public' and table_name = 'applications' and column_name = 'WebVersion') then
     alter table applications add column WebVersion text not null default ''; end if;
+  if not exists (select from information_schema.columns where table_schema = 'public' and table_name = 'applications' and column_name = 'AppStoreUrl') then
+    alter table applications add column AppStoreUrl text not null default ''; end if;
+  if not exists (select from information_schema.columns where table_schema = 'public' and table_name = 'applications' and column_name = 'PlayStoreUrl') then
+    alter table applications add column PlayStoreUrl text not null default ''; end if;
+  if not exists (select from information_schema.columns where table_schema = 'public' and table_name = 'applications' and column_name = 'BrochureUrl') then
+    alter table applications add column BrochureUrl text not null default ''; end if;
+  if not exists (select from information_schema.columns where table_schema = 'public' and table_name = 'applications' and column_name = 'Icon') then
+    alter table applications add column Icon text not null default ''; end if;
+  if not exists (select from information_schema.columns where table_schema = 'public' and table_name = 'applications' and column_name = 'TermsUrl') then
+    alter table applications add column TermsUrl text not null default ''; end if;
+  if not exists (select from information_schema.columns where table_schema = 'public' and table_name = 'applications' and column_name = 'ShowSettings') then
+    alter table applications add column ShowSettings boolean not null default false; end if;
+  if not exists (select from information_schema.columns where table_schema = 'public' and table_name = 'applications' and column_name = 'WikiLinks') then
+    alter table applications add column WikiLinks boolean not null default false; end if;
+  if not exists (select from information_schema.columns where table_schema = 'public' and table_name = 'applications' and column_name = 'IsSession') then
+    alter table applications add column IsSession boolean not null default false; end if;
+  if not exists (select from information_schema.columns where table_schema = 'public' and table_name = 'applications' and column_name = 'SessionParameter') then
+    alter table applications add column SessionParameter text not null default ''; end if;
+  if not exists (select from information_schema.columns where table_schema = 'public' and table_name = 'applications' and column_name = 'HideIfNotLicensed') then
+    alter table applications add column HideIfNotLicensed boolean not null default false; end if;
+  if not exists (select from information_schema.columns where table_schema = 'public' and table_name = 'applications' and column_name = 'SendCabEmail') then
+    alter table applications add column SendCabEmail boolean not null default false; end if;
+  if not exists (select from information_schema.columns where table_schema = 'public' and table_name = 'applications' and column_name = 'SendUpdateEmail') then
+    alter table applications add column SendUpdateEmail boolean not null default false; end if;
+  if not exists (select from information_schema.columns where table_schema = 'public' and table_name = 'applications' and column_name = 'SendUserGuidesEmail') then
+    alter table applications add column SendUserGuidesEmail boolean not null default false; end if;
+  if not exists (select from information_schema.columns where table_schema = 'public' and table_name = 'applications' and column_name = 'SendAPIImprovementsEmail') then
+    alter table applications add column SendAPIImprovementsEmail boolean not null default false; end if;
+  if not exists (select from information_schema.columns where table_schema = 'public' and table_name = 'applications' and column_name = 'SendFieldCabEmail') then
+    alter table applications add column SendFieldCabEmail boolean not null default false; end if;
+  if not exists (select from information_schema.columns where table_schema = 'public' and table_name = 'applications' and column_name = 'SendParamScreen') then
+    alter table applications add column SendParamScreen boolean not null default false; end if;
+  if not exists (select from information_schema.columns where table_schema = 'public' and table_name = 'applications' and column_name = 'SendWebEmail') then
+    alter table applications add column SendWebEmail boolean not null default false; end if;
+  if not exists (select from information_schema.columns where table_schema = 'public' and table_name = 'applications' and column_name = 'VersionBAQ') then
+    alter table applications add column VersionBAQ text not null default ''; end if;
+  if not exists (select from information_schema.columns where table_schema = 'public' and table_name = 'applications' and column_name = 'WebVersion') then
+    alter table applications add column WebVersion text not null default ''; end if;
+  if not exists (select from information_schema.columns where table_schema = 'public' and table_name = 'applications' and column_name = 'ImageData') then
+    alter table applications add column ImageData text not null default ''; end if;
+  if not exists (select from information_schema.columns where table_schema = 'public' and table_name = 'applications' and column_name = 'AppVersion') then
+    alter table applications add column AppRelease date null; end if;
 
 /**********************************************************************************************************************************************************************************
 ***********************************************************************************************************************************************************************************
