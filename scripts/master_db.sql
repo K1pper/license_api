@@ -1,15 +1,14 @@
 /*
-  First create a GHALicensePortal database
+  First create a master database
 */
 
-use master;
-
-do 
-$DATA_DEFINITION$
+do $$
 declare
-  _database text = 'GHALicensePortal';
-  _role_name text = 'GHARole';
-  _user_name text = 'GHAUser';
+  _database text = 'master';
+  _role_name text = 'MasterRole';
+  _user_name text = 'MasterUser';
+  mfs_application_name text = 'Mobile Field Service';
+  licensekey text;
 begin
   raise notice 'Updating schema...';
 
@@ -20,9 +19,9 @@ begin
     raise notice 'Role % created...', _role_name;
   end if;
 
-  execute 'grant connect on database '||_database||' to '||GHARole;
-  execute 'grant usage on schema public to '||GHARole;
-  
+  execute 'grant connect on database '||_database||' to '||_role_name;
+  execute 'grant usage on schema public to '||_role_name;
+
   if exists (select from pg_roles where rolname = _user_name and rolcanlogin = true) then
     raise notice 'Role % already exists...', _user_name;
   else
@@ -51,7 +50,7 @@ begin
     Suspended bool not null default false
   );
   create index application_name ON Applications(Name);
-    execute 'grant all on applications to '||main_role_name;
+    execute 'grant all on applications to '||_role_name;
   end if;
 
   if not exists (select from information_schema.columns where table_schema = 'public' and table_name = 'applications' and column_name = 'AppVersion') then
@@ -96,12 +95,8 @@ begin
     alter table applications add column SendWebEmail boolean not null default false; end if;
   if not exists (select from information_schema.columns where table_schema = 'public' and table_name = 'applications' and column_name = 'VersionBAQ') then
     alter table applications add column VersionBAQ text not null default ''; end if;
-  if not exists (select from information_schema.columns where table_schema = 'public' and table_name = 'applications' and column_name = 'WebVersion') then
-    alter table applications add column WebVersion text not null default ''; end if;
   if not exists (select from information_schema.columns where table_schema = 'public' and table_name = 'applications' and column_name = 'ImageData') then
     alter table applications add column ImageData text not null default ''; end if;
-  if not exists (select from information_schema.columns where table_schema = 'public' and table_name = 'applications' and column_name = 'AppVersion') then
-    alter table applications add column AppRelease date null; end if;
 
 /**********************************************************************************************************************************************************************************
 ***********************************************************************************************************************************************************************************
@@ -121,7 +116,7 @@ begin
     CreateDate timestamp not null default now(),  
     Suspended bool not null default false
   );
-    execute 'grant all on customers to '||main_role_name;
+    execute 'grant all on customers to '||_role_name;
   end if;
 
 /**********************************************************************************************************************************************************************************
@@ -143,18 +138,30 @@ begin
     CreateDate timestamp not null default now(),  
     Suspended bool not null default false
   );
-    execute 'grant all on customerapps to '||main_role_name;
+    execute 'grant all on customerapps to '||_role_name;
   end if;
 
-end
-$DATA_DEFINITION$;
+/**********************************************************************************************************************************************************************************
+***********************************************************************************************************************************************************************************
+**
+**    Users
+**
+***********************************************************************************************************************************************************************************
+**********************************************************************************************************************************************************************************/
 
-do 
-$SEED$
-declare
-  mfs_application_name text = 'Mobile Field Service';
-  licensekey text;
-begin
+  if exists (select from information_schema.tables where table_schema = 'public' and table_name = 'users' and table_type = 'BASE TABLE') then
+    raise notice 'Table users already exists...';
+  else
+  create table users (
+    UserId uuid primary key default gen_random_uuid(),  --non clustered...
+    EmailAddress text not null default '',
+    Password text not null default '',
+    CreateDate timestamp not null default now(),  
+    Suspended bool not null default false
+  );
+    execute 'grant all on users to '||_role_name;
+  end if;
+
   licensekey = right('0000' || (trunc(random() * 9999 + 1))::text, 4) || '-' || 
                right('0000' || (trunc(random() * 9999 + 1))::text, 4) || '-' || 
                right('0000' || (trunc(random() * 9999 + 1))::text, 4) || '-' || 
@@ -167,10 +174,15 @@ begin
 
   if not exists (select from applications where name = mfs_application_name) then 
     insert into applications (name, licencekey) values (mfs_application_name, licensekey); 
+  end if;  
+  
+  if not exists (select from users where emailaddress = 'pjroden@gmail.com') then 
+    insert into users (emailaddress, password) values ('pjroden@gmail.com', 'P@ssword1'); 
   end if;
 end
-$SEED$;
+$$;
 
+/*
 select * from applications;
 select * from customers;
 select * from customerapps;
@@ -187,6 +199,7 @@ drop table userapplications;
 drop table usercustomers;
 drop table devices;
 
-drop role GHAUser;
-drop owned by GHARole;
-drop role GHARole;
+drop role MasterUser;
+drop owned by MasterRole;
+drop role MasterRole;
+*/
