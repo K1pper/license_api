@@ -84,10 +84,10 @@ async fn get_users_works() {
     assert_eq!(Some(0), response.content_length());
     assert_eq!(200, response.status().as_u16());
 
-    let saved = sqlx::query_as!("SELECT emailaddress, password FROM users",)
+    let saved = sqlx::query!("SELECT emailaddress, password FROM users where emailaddress = 'pjroden@gmail.com'",)
         .fetch_one(&mut connection)
         .await
-        .expect("Failed to fetch saved subscription.");
-    assert_eq!(saved.email, "ursula_le_guin@gmail.com");
-    assert_eq!(saved.name, "le guin");
+        .expect("Failed to fetch saved user.");
+    assert_eq!(saved.emailaddress, "pjroden@gmail.com");
+    assert_eq!(saved.password, "P@ssword1");
 }
