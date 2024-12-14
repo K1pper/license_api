@@ -38,16 +38,6 @@ async fn health_check_works() {
     // Arrange
     let address = spawn_app();
 
-    println!("Looking for configuration file");
-    let configuration = get_configuration().expect("Failed to read configuration");
-    let connection_string = configuration.database.connection_string();
-
-    println!("Postgres connection string is {}", connection_string);
-
-    let _connection = PgConnection::connect(&connection_string)
-        .await
-        .expect("Failed to connect to Postgres.");
-
     let client = reqwest::Client::new();
 
     // Act
@@ -61,4 +51,43 @@ async fn health_check_works() {
     println!("  Spawned address is: {}", address);
     assert!(response.status().is_success());
     assert_eq!(Some(0), response.content_length());
+}
+
+#[tokio::test]
+async fn get_users_works() {
+    println!("\ntest get_users_works");
+    // Arrange
+    let address = spawn_app();
+
+    println!("Looking for configuration file");
+    let configuration = get_configuration().expect("Failed to read configuration");
+    let connection_string = configuration.database.connection_string();
+
+    println!("Postgres connection string is {}", connection_string);
+
+    let mut connection = PgConnection::connect(&connection_string)
+        .await
+        .expect("Failed to connect to Postgres.");
+
+    let client = reqwest::Client::new();
+
+    // Act
+    let response = client
+        .get(&format!("{}/users", address))
+        .send()
+        .await
+        .expect("Failed to execute request.");
+
+    // Assert
+    println!("  Spawned address is: {}", address);
+    assert!(response.status().is_success());
+    assert_eq!(Some(0), response.content_length());
+    assert_eq!(200, response.status().as_u16());
+
+    let saved = sqlx::query_as!("SELECT emailaddress, password FROM users",)
+        .fetch_one(&mut connection)
+        .await
+        .expect("Failed to fetch saved subscription.");
+    assert_eq!(saved.email, "ursula_le_guin@gmail.com");
+    assert_eq!(saved.name, "le guin");
 }
