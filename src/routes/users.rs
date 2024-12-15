@@ -1,16 +1,12 @@
 use actix_web::{web, HttpResponse, Responder, Result};
-//use uuid::Uuid;
-use serde::Serialize;
-//use sqlx::types::{chrono::{DateTime, Utc}, uuid::{self}};
+use crate::{entities::users::*, services::get_user_service};
+use crate::db::*;
+use sqlx::PgConnection;
 
-pub async fn get_user() -> Result<impl Responder> {
-    let response = UserResponse {
-            success: true,
-            message: "".to_string(),
-            EmailAddress: "pjroden@gmail.com".to_string(),
-            password: "password".to_string(),
-    };
-    Ok(web::Json(response))
+
+pub async fn get_user(request: web::Json<UserRequest>) -> Result<impl Responder> {
+    let mut connection: PgConnection = connection().await;
+    Ok(web::Json(get_user_service(request, &mut connection).await))
 }
 
 pub async fn get_users() -> HttpResponse {
@@ -37,14 +33,3 @@ pub async fn logout() -> HttpResponse {
     HttpResponse::Ok().finish()
 }
 
-#[derive(Serialize)]
-#[warn(non_snake_case)]
-struct UserResponse {
-    EmailAddress: String,
-    password: String,
-    // UserId: Uuid,
-    // Suspended: bool,
-    // CreateDate:DateTime<Utc>
-    success: bool,
-    message: String,
-}

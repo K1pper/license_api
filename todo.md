@@ -1,0 +1,10 @@
+- [ ] Add the other fields into the user response entitity
+- [ ] Write test for get user, then to tdd from now on
+- [ ] Get list
+- [ ] Post
+- [ ] Patch
+- [ ] Delete
+- [ ] Login, get token
+- [ ] Logout, validate token
+- [ ] Connections? Pools?
+- [ ] Follow book
