@@ -1,8 +1,7 @@
-use actix_web::{web, HttpResponse, Responder, Result};
-use crate::{entities::users::*, services::get_user_service};
 use crate::db::*;
+use crate::{entities::users::*, services::get_user_service};
+use actix_web::{web, HttpResponse, Responder, Result};
 use sqlx::PgConnection;
-
 
 pub async fn get_user(request: web::Json<UserRequest>) -> Result<impl Responder> {
     let mut connection: PgConnection = connection().await;
@@ -32,4 +31,3 @@ pub async fn login() -> HttpResponse {
 pub async fn logout() -> HttpResponse {
     HttpResponse::Ok().finish()
 }
-

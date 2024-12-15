@@ -1,8 +1,8 @@
 #![warn(clippy::all, clippy::pedantic)]
 
-use std::net::TcpListener;
-use license_api::startup::run;
 use license_api::configuration::get_configuration;
+use license_api::startup::run;
+use std::net::TcpListener;
 
 #[tokio::main]
 async fn main() -> Result<(), std::io::Error> {

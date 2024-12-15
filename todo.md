@@ -1,9 +1,11 @@
-- [ ] Add the other fields into the user response entitity
+- [x] Add the other fields into the user response entitity
 - [ ] Write test for get user, then to tdd from now on
 - [ ] Get list
 - [ ] Post
 - [ ] Patch
 - [ ] Delete
+- [ ] Encrypt password
+- [ ] Hash pasword
 - [ ] Login, get token
 - [ ] Logout, validate token
 - [ ] Connections? Pools?
