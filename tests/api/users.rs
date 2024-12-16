@@ -14,10 +14,8 @@ async fn check_get_user_works() {
     });
     
 
-    println!("{}", format!("{}/AuthenticationSvc/User", address));
-
     let response = client
-        .get(&format!("{}/AuthenticationSvc/User", address))
+        .get(&format!("{}/User", address))
         .form(&body)
         .send()
         .await

@@ -17,3 +17,11 @@ pub async fn query(sql: &str, connection: &mut PgConnection) -> Option<PgRow> {
         .await
         .expect("Failed to fetch saved user.")
 }
+
+pub async fn post(sql: &str, connection: &mut PgConnection) -> Option<PgRow> {
+    Some(sqlx::query(&sql)
+        .fetch_one(connection)
+        .await
+        .expect("Failed to add user."))
+}
+

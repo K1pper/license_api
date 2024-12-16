@@ -22,10 +22,10 @@ impl Default for UserResponse {
             UserId: <Uuid as UuidExt>::empty(),
             EmailAddress: format!(""),
             Password: format!(""),
-            Success: false,
-            Message: format!(""),
             Suspended: true,
             CreateDate: Utc::now(),
+            Success: false,
+            Message: format!(""),
         }
     }
 }

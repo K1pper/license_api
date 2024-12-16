@@ -20,7 +20,7 @@ features = [
 [dependencies.uuid]
 version = "1.11.0"
 features = [
-    "v7",                # Lets you generate random UUIDs for databases
+    "v4",                # Lets you generate random UUIDs for databases
     "fast-rng",          # Use a faster (but still sufficiently random) RNG
     "macro-diagnostics", # Enable better diagnostics for compile-time UUIDs
     "serde"
